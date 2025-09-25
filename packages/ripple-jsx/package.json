@@ -1,0 +1,39 @@
+{
+  "name": "ripple-jsx",
+  "version": "0.0.0",
+  "description": "JSX Runtime for Ripple JS",
+  "keywords": [
+    "js",
+    "component",
+    "jsx",
+    "RippleJS",
+    "ripple"
+  ],
+  "author": "Abraham Aremu <anubra266@gmail.com>",
+  "homepage": "https://github.com/anubra266/ripple-jsx#readme",
+  "license": "MIT",
+  "main": "src/index.js",
+  "repository": "https://github.com/anubra266/ripple-jsx/tree/main/packages/ripple-jsx",
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "src"
+  ],
+  "bugs": {
+    "url": "https://github.com/anubra266i/ripple-jsx/issues"
+  },
+  "scripts": {
+    "test": "echo \"No test specified\""
+  },
+  "peerDependencies": {
+    "ripple": ">=0.2.0"
+  },
+  "devDependencies": {
+    "typescript": "~5.6.2"
+  },
+  "dependencies": {
+   
+  }
+}
