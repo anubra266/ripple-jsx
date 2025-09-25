@@ -203,7 +203,12 @@ export function jsx(type, props) {
     return function componentWrapper(anchor, wrapperProps,block) {
       // Merge props from JSX with any additional props
       const mergedProps = { ...props, ...wrapperProps };
-      return (type(mergedProps))(anchor, wrapperProps, block);
+      const isFragment = type.length === 1;
+      if (isFragment) {
+        return (type(mergedProps))(anchor, wrapperProps, block);
+      } else {
+        return type(anchor, wrapperProps, block);
+      }
 };
   } else if (typeof type === 'string') {
     // DOM element - return a component function that creates the element
