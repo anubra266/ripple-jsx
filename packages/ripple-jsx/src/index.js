@@ -4,32 +4,31 @@
  * This provides actual DOM element creation and proper JSX support
  */
 
-import { set_attribute, append,  active_block } from 'ripple/internal/client';
+import { set_attribute, append, active_block } from 'ripple/internal/client';
 
 function assign_nodes(start, end) {
-    var block = /** @type {Block} */ (active_block);
-    var s = block.s;
-    if (s === null) {
-      block.s = {
-        start,
-        end,
-      };
-    } else if (s.start === null) {
-      s.start = start;
-      s.end = end;
-    }
+  var block = /** @type {Block} */ (active_block);
+  var s = block.s;
+  if (s === null) {
+    block.s = {
+      start,
+      end,
+    };
+  } else if (s.start === null) {
+    s.start = start;
+    s.end = end;
   }
+}
 
-  function create_anchor() {
-    var t = document.createTextNode('');
-    t.__t = '';
-    return t;
-  }
+function create_anchor() {
+  var t = document.createTextNode('');
+  t.__t = '';
+  return t;
+}
 
-  function create_text(value = '') {
-    return document.createTextNode(value);
-  }
-  
+function create_text(value = '') {
+  return document.createTextNode(value);
+}
 
 // JSX attribute name mappings (similar to React/Svelte)
 const MAPPED_ATTRIBUTES = new Map([
@@ -201,15 +200,15 @@ export function jsx(type, props) {
   if (typeof type === 'function') {
     // Component function - return a wrapper that calls it properly
     /** @param {any} anchor @param {any} wrapperProps @param {any} block */
-    return function componentWrapper(anchor, wrapperProps, block) {
+    return function componentWrapper(anchor, wrapperProps,block) {
       // Merge props from JSX with any additional props
       const mergedProps = { ...props, ...wrapperProps };
-      return type(anchor, mergedProps, block);
-    };
+      return (type(mergedProps))(anchor, wrapperProps, block);
+};
   } else if (typeof type === 'string') {
     // DOM element - return a component function that creates the element
     /** @param {any} anchor @param {any} wrapperProps @param {any} block */
-    return function elementWrapper(anchor, wrapperProps, block) {
+    return function elementWrapper(anchor, wrapperProps) {
       const element = createElement(type);
       const mergedProps = { ...props, ...wrapperProps };
       const { attributes, events, children } = processProps(mergedProps);
