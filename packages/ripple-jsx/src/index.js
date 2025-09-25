@@ -126,9 +126,23 @@ function createElement(tag) {
 }
 
 /**
+ * Creates a children component function that renders the children imperatively
+ * @param {any[]} rawChildren - Raw children data (strings, elementWrappers, etc.)
+ * @returns {Function} - Ripple component function that renders children
+ */
+function createChildrenComponent(rawChildren) {
+  const flattenedChildren = flattenChildren(rawChildren);
+  
+  // Return a Ripple component function that renders the children
+  return function children(anchor, props, block) {
+    renderChildren(anchor, flattenedChildren);
+  };
+}
+
+/**
  * Processes JSX props and separates them into attributes, events, and children
  * @param {Record<string, any> | null} props - Raw JSX props
- * @returns {{attributes: Record<string, any>, events: Record<string, Function>, children: any[]}} - Processed props object
+ * @returns {{attributes: Record<string, any>, events: Record<string, Function>, children: Function}} - Processed props object
  */
 function processProps(props) {
   const { children = [], ...otherProps } = props || {};
@@ -136,7 +150,7 @@ function processProps(props) {
   const attributes = {};
   /** @type {Record<string, Function>} */
   const events = {};
-
+  
   for (const [key, value] of Object.entries(otherProps)) {
     if (key.startsWith('on') && typeof value === 'function') {
       // Event handler
@@ -148,8 +162,12 @@ function processProps(props) {
       attributes[htmlKey] = value;
     }
   }
-
-  return { attributes, events, children: flattenChildren(children) };
+  
+  return { 
+    attributes, 
+    events, 
+    children: createChildrenComponent(children) // Now returns a component function!
+  };
 }
 
 /**
@@ -200,16 +218,25 @@ export function jsx(type, props) {
   if (typeof type === 'function') {
     // Component function - return a wrapper that calls it properly
     /** @param {any} anchor @param {any} wrapperProps @param {any} block */
-    return function componentWrapper(anchor, wrapperProps,block) {
+    return function componentWrapper(anchor, wrapperProps, block) {
       // Merge props from JSX with any additional props
-      const mergedProps = { ...props, ...wrapperProps };
+      const rawProps = { ...props, ...wrapperProps };
+      
+      // Convert children to a component function for components
+      const processedProps = {
+        ...rawProps,
+        children: rawProps.children ? createChildrenComponent(
+          Array.isArray(rawProps.children) ? rawProps.children : [rawProps.children]
+        ) : createChildrenComponent([])
+      };
+      
       const isFragment = type.length === 1;
       if (isFragment) {
-        return (type(mergedProps))(anchor, mergedProps, block);
+        return type(processedProps)(anchor, processedProps, block);
       } else {
-        return type(anchor, mergedProps, block);
+        type(anchor, processedProps, block);
       }
-};
+    };
   } else if (typeof type === 'string') {
     // DOM element - return a component function that creates the element
     /** @param {any} anchor @param {any} wrapperProps @param {any} block */
@@ -232,12 +259,10 @@ export function jsx(type, props) {
         element.addEventListener(eventName, /** @type {EventListener} */ (handler));
       }
 
-      // Render children inside the element
-      if (children.length > 0) {
-        const childAnchor = create_anchor();
-        element.appendChild(childAnchor);
-        renderChildren(childAnchor, children);
-      }
+      // Render children inside the element using the children component function
+      const childAnchor = create_anchor();
+      element.appendChild(childAnchor);
+      children(childAnchor, {}, active_block);
 
       // Append element to DOM and assign nodes for block tracking
       append(anchor, element);
@@ -267,17 +292,15 @@ export function jsxs(type, props) {
 export function Fragment(props) {
   /** @param {any} anchor @param {any} wrapperProps @param {any} block */
   return function fragmentWrapper(anchor, wrapperProps, block) {
-    const mergedProps = { ...props, ...wrapperProps };
-    const { children } = processProps(mergedProps);
-
-    if (children.length === 0) {
-      // Empty fragment - create a single text node anchor
-      const emptyNode = create_text('');
-      append(anchor, emptyNode);
-      assign_nodes(emptyNode, emptyNode);
-    } else {
-      renderChildren(anchor, children);
-    }
+    const rawProps = { ...props, ...wrapperProps };
+    
+    // Create children component function
+    const children = rawProps.children ? createChildrenComponent(
+      Array.isArray(rawProps.children) ? rawProps.children : [rawProps.children]
+    ) : createChildrenComponent([]);
+    
+    // Render children directly (no wrapper element)
+    children(anchor, {}, block);
   };
 }
 
