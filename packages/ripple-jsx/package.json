@@ -1,6 +1,6 @@
 {
   "name": "ripple-jsx",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "JSX Runtime for Ripple JS",
   "keywords": [
     "js",
@@ -33,7 +33,5 @@
   "devDependencies": {
     "typescript": "~5.6.2"
   },
-  "dependencies": {
-   
-  }
+  "dependencies": {}
 }
