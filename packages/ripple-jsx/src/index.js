@@ -205,9 +205,9 @@ export function jsx(type, props) {
       const mergedProps = { ...props, ...wrapperProps };
       const isFragment = type.length === 1;
       if (isFragment) {
-        return (type(mergedProps))(anchor, wrapperProps, block);
+        return (type(mergedProps))(anchor, mergedProps, block);
       } else {
-        return type(anchor, wrapperProps, block);
+        return type(anchor, mergedProps, block);
       }
 };
   } else if (typeof type === 'string') {
