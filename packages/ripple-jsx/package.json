@@ -20,8 +20,7 @@
     "access": "public"
   },
   "files": [
-    "src",
-    "src/index.d.ts"
+    "src"
   ],
   "bugs": {
     "url": "https://github.com/anubra266i/ripple-jsx/issues"
